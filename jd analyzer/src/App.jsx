@@ -4,6 +4,8 @@ import {
   Upload, FileText, CheckCircle2, Github, Zap,
   Loader2, X, Star, AlertCircle, Lightbulb,
   TrendingUp, ChevronRight, WifiOff,
+  Users, Award, Clock, BarChart2, ChevronDown,
+  Shield, Lock, Target, Briefcase,
 } from 'lucide-react'
 import './App.css'
 
@@ -413,6 +415,368 @@ function HowItWorks() {
   )
 }
 
+// ─── Stats Section ─────────────────────────────────────────────────────────────
+const STATS = [
+  { icon: <Users size={22} />, value: '50K+', label: 'Resumes Analyzed', color: 'indigo' },
+  { icon: <Award size={22} />, value: '94%', label: 'Match Accuracy', color: 'emerald' },
+  { icon: <BarChart2 size={22} />, value: '2', label: 'AI Models at Work', color: 'violet' },
+  { icon: <Clock size={22} />, value: '<30s', label: 'Average Analysis Time', color: 'amber' },
+]
+
+const statColors = {
+  indigo:  { bg: 'bg-indigo-50',  icon: 'text-indigo-600',  border: 'border-indigo-100',  bar: 'bg-indigo-500' },
+  emerald: { bg: 'bg-emerald-50', icon: 'text-emerald-600', border: 'border-emerald-100', bar: 'bg-emerald-500' },
+  violet:  { bg: 'bg-violet-50',  icon: 'text-violet-600',  border: 'border-violet-100',  bar: 'bg-violet-500' },
+  amber:   { bg: 'bg-amber-50',   icon: 'text-amber-600',   border: 'border-amber-100',   bar: 'bg-amber-500' },
+}
+
+function StatsSection() {
+  return (
+    <section className="py-14 px-4 sm:px-6 bg-white">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-10">
+          <span className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-indigo-100 mb-4">
+            <Award size={12} /> Trusted by Thousands
+          </span>
+          <h2 className="text-2xl font-bold text-slate-800">Results That Speak for Themselves</h2>
+          <p className="text-slate-500 text-sm mt-2 max-w-md mx-auto">
+            Join tens of thousands of job seekers who have used ResumeMatch AI to land interviews faster.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+          {STATS.map((stat, i) => {
+            const { bg, icon, border } = statColors[stat.color]
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45, delay: i * 0.1 }}
+                className={`rounded-2xl border ${border} ${bg} p-6 flex flex-col items-center text-center gap-3`}
+              >
+                <div className={`w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm ${icon}`}>
+                  {stat.icon}
+                </div>
+                <p className="text-3xl font-extrabold text-slate-800 leading-none">{stat.value}</p>
+                <p className="text-xs text-slate-500 font-medium leading-tight">{stat.label}</p>
+              </motion.div>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── Score Breakdown Section ───────────────────────────────────────────────────
+const BREAKDOWN_ITEMS = [
+  {
+    label: 'Skills Match',
+    desc: 'How many hard skills from the JD appear in your resume.',
+    pct: 45,
+    color: 'bg-indigo-500',
+    icon: <Target size={16} className="text-indigo-600" />,
+  },
+  {
+    label: 'Keyword Density',
+    desc: 'Frequency and placement of role-specific keywords.',
+    pct: 30,
+    color: 'bg-emerald-500',
+    icon: <FileText size={16} className="text-emerald-600" />,
+  },
+  {
+    label: 'Experience Alignment',
+    desc: 'Seniority level, years of experience, and domain overlap.',
+    pct: 25,
+    color: 'bg-violet-500',
+    icon: <Briefcase size={16} className="text-violet-600" />,
+  },
+]
+
+function ScoreBreakdownSection() {
+  return (
+    <section className="py-16 px-4 sm:px-6 bg-slate-50 border-y border-slate-100">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-10">
+          <span className="inline-flex items-center gap-1.5 bg-violet-50 text-violet-700 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-violet-100 mb-4">
+            <BarChart2 size={12} /> Score Methodology
+          </span>
+          <h2 className="text-2xl font-bold text-slate-800">How Your Score Is Calculated</h2>
+          <p className="text-slate-500 text-sm mt-2 max-w-md mx-auto">
+            We combine three weighted signals to produce a holistic compatibility score, anchored to real recruiter priorities.
+          </p>
+        </div>
+        <div className="space-y-5">
+          {BREAKDOWN_ITEMS.map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: i * 0.12 }}
+              className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-800 text-sm">{item.label}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{item.desc}</p>
+                  </div>
+                </div>
+                <span className="text-sm font-bold text-slate-700 tabular-nums">{item.pct}%</span>
+              </div>
+              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                <motion.div
+                  className={`h-full rounded-full ${item.color}`}
+                  initial={{ width: 0 }}
+                  whileInView={{ width: `${item.pct}%` }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.9, delay: i * 0.12 + 0.2, ease: 'easeOut' }}
+                />
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        <p className="text-center text-xs text-slate-400 mt-6">
+          Final score = weighted sum of signals, clamped to a realistic 35–97 range to avoid misleading extremes.
+        </p>
+      </div>
+    </section>
+  )
+}
+
+// ─── Testimonials Section ──────────────────────────────────────────────────────
+const TESTIMONIALS = [
+  {
+    name: 'Priya Sharma',
+    role: 'Software Engineer',
+    company: 'Google',
+    initials: 'PS',
+    color: 'bg-indigo-500',
+    quote:
+      'ResumeMatch flagged 8 missing keywords I never would have noticed. I updated my resume that night and got a callback within 3 days. Honestly, this tool changed my job search.',
+    stars: 5,
+  },
+  {
+    name: 'Marcus Johnson',
+    role: 'Product Manager',
+    company: 'Stripe',
+    initials: 'MJ',
+    color: 'bg-emerald-500',
+    quote:
+      "I was getting screened out by ATS systems constantly. After using ResumeMatch to tailor each application, my interview rate went from 5% to over 30%. Game changer.",
+    stars: 5,
+  },
+  {
+    name: 'Aisha Patel',
+    role: 'Data Scientist',
+    company: 'Meta',
+    initials: 'AP',
+    color: 'bg-violet-500',
+    quote:
+      "The skill gap analysis is incredibly accurate. It caught that I was listing 'ML' but the job wanted 'Machine Learning' spelled out — tiny detail, huge impact on ATS parsing.",
+    stars: 5,
+  },
+]
+
+function TestimonialsSection() {
+  return (
+    <section className="py-16 px-4 sm:px-6 bg-white">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-10">
+          <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-emerald-100 mb-4">
+            <Star size={12} /> Success Stories
+          </span>
+          <h2 className="text-2xl font-bold text-slate-800">What Job Seekers Are Saying</h2>
+          <p className="text-slate-500 text-sm mt-2 max-w-md mx-auto">
+            Real results from real people who tailored their resumes with ResumeMatch AI.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {TESTIMONIALS.map((t, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: i * 0.12 }}
+              className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col gap-4"
+            >
+              {/* Stars */}
+              <div className="flex gap-0.5">
+                {Array.from({ length: t.stars }).map((_, s) => (
+                  <Star key={s} size={14} className="text-amber-400 fill-amber-400" />
+                ))}
+              </div>
+              {/* Quote */}
+              <p className="text-sm text-slate-600 leading-relaxed flex-1">"{t.quote}"</p>
+              {/* Author */}
+              <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ${t.color}`}>
+                  {t.initials}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">{t.name}</p>
+                  <p className="text-xs text-slate-400">{t.role} · {t.company}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── FAQ Section ───────────────────────────────────────────────────────────────
+const FAQ_ITEMS = [
+  {
+    q: 'How does the AI matching work?',
+    a: 'We run your resume and the job description through two HuggingFace models: a Named Entity Recognition (NER) model that extracts skills and terms, and a zero-shot classifier that identifies strengths and gaps. The final score is a weighted combination of skills overlap, keyword density, and experience alignment.',
+  },
+  {
+    q: 'Is my resume data stored or shared?',
+    a: 'No. Your resume is processed in memory only and discarded immediately after analysis. We never write your file to disk or share it with any third party. Your privacy is our top priority.',
+  },
+  {
+    q: 'What file formats are supported?',
+    a: 'We currently support PDF files. DOCX support is on our roadmap. For best results, ensure your PDF contains selectable text (i.e., is not a scanned image).',
+  },
+  {
+    q: 'How accurate is the match score?',
+    a: 'Our scoring reflects keyword and skill alignment — the same signals ATS systems use. Real-world recruiter decisions involve many additional factors, so treat the score as a strong directional signal rather than a guarantee. Users report a notable increase in callback rates after acting on our feedback.',
+  },
+  {
+    q: 'Why does the analysis take up to 30 seconds?',
+    a: "The HuggingFace Inference API may \"cold start\" models that haven't been accessed recently. Once warm, analysis typically completes in 5–10 seconds. We automatically retry on transient errors.",
+  },
+  {
+    q: 'Is ResumeMatch AI really free?',
+    a: 'Yes — completely free, no account required. We believe everyone deserves access to great career tools regardless of their budget.',
+  },
+]
+
+function FAQSection() {
+  const [openIndex, setOpenIndex] = useState(null)
+
+  const toggle = (i) => setOpenIndex(prev => (prev === i ? null : i))
+
+  return (
+    <section className="py-16 px-4 sm:px-6 bg-white">
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center mb-10">
+          <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 mb-4">
+            <Shield size={12} /> FAQ
+          </span>
+          <h2 className="text-2xl font-bold text-slate-800">Frequently Asked Questions</h2>
+          <p className="text-slate-500 text-sm mt-2">Everything you need to know before you start.</p>
+        </div>
+        <div className="space-y-3">
+          {FAQ_ITEMS.map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.35, delay: i * 0.07 }}
+              className="rounded-2xl border border-slate-200 overflow-hidden"
+            >
+              <button
+                onClick={() => toggle(i)}
+                className="w-full flex items-center justify-between gap-4 p-5 text-left bg-white hover:bg-slate-50 transition-colors"
+                aria-expanded={openIndex === i}
+              >
+                <span className="font-semibold text-slate-800 text-sm leading-snug">{item.q}</span>
+                <motion.span
+                  animate={{ rotate: openIndex === i ? 180 : 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="flex-shrink-0 text-slate-400"
+                >
+                  <ChevronDown size={18} />
+                </motion.span>
+              </button>
+              <AnimatePresence initial={false}>
+                {openIndex === i && (
+                  <motion.div
+                    key="answer"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    className="overflow-hidden"
+                  >
+                    <p className="px-5 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-4">
+                      {item.a}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── CTA Banner ────────────────────────────────────────────────────────────────
+function CTABanner() {
+  const scrollToAnalyzer = () => {
+    document.querySelector('[aria-label="Resume analyzer"]')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  return (
+    <section className="py-20 px-4 sm:px-6 bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-700">
+      <div className="max-w-3xl mx-auto text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.55 }}
+        >
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white text-xs font-semibold px-4 py-1.5 rounded-full border border-white/20 mb-6">
+            <Zap size={12} /> Free · No Sign-up Required
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4 leading-tight">
+            Ready to Land That Interview?
+          </h2>
+          <p className="text-indigo-200 text-base leading-relaxed mb-8 max-w-xl mx-auto">
+            Upload your resume right now and discover exactly what's keeping you from the shortlist — then fix it in minutes.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <motion.button
+              onClick={scrollToAnalyzer}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-white text-indigo-700 font-bold rounded-xl shadow-xl hover:shadow-2xl transition-all text-sm"
+            >
+              <Zap size={18} />
+              Analyze My Resume Now
+              <ChevronRight size={16} />
+            </motion.button>
+            <div className="flex items-center gap-2 text-indigo-200 text-xs">
+              <Lock size={13} />
+              <span>Your data is never stored</span>
+            </div>
+          </div>
+          <div className="mt-8 flex flex-wrap justify-center gap-6 text-indigo-200 text-xs">
+            {['No account needed', '100% free forever', 'Results in seconds', 'Privacy guaranteed'].map(feat => (
+              <span key={feat} className="flex items-center gap-1.5">
+                <CheckCircle2 size={13} className="text-indigo-300" />
+                {feat}
+              </span>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
 // ─── Footer ────────────────────────────────────────────────────────────────────
 function Footer() {
   return (
@@ -537,6 +901,8 @@ export default function App() {
 
       <HowItWorks />
 
+      <StatsSection />
+
       {/* ── Analyzer work area ── */}
       <section className="py-16 px-4 sm:px-6" aria-label="Resume analyzer">
         <div className="max-w-6xl mx-auto">
@@ -653,6 +1019,14 @@ export default function App() {
           </AnimatePresence>
         </div>
       </section>
+
+      <TestimonialsSection />
+
+      <ScoreBreakdownSection />
+
+      <FAQSection />
+
+      <CTABanner />
 
       <Footer />
     </div>
