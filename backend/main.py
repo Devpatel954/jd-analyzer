@@ -42,6 +42,10 @@ SKILL_NER_URL = (
 ZERO_SHOT_URL = (
     "https://api-inference.huggingface.co/models/facebook/bart-large-mnli"
 )
+# Text-to-text generation model for cover letter drafting
+FLAN_T5_URL = (
+    "https://api-inference.huggingface.co/models/google/flan-t5-large"
+)
 
 # ── Static knowledge bases ─────────────────────────────────────────────────────
 # Used for fast regex augmentation and as a safety net if the NER model fails.
@@ -441,3 +445,129 @@ async def analyze(
         "foundSkills":     match["foundSkills"],
         "requiredSkills":  match["missingSkills"],
     }
+
+
+# ── Cover letter helpers ───────────────────────────────────────────────────────
+
+def _build_cover_letter_template(
+    name: str,
+    role: str,
+    skills: list[str],
+    strengths: list[str],
+    jd_snippet: str,
+) -> str:
+    """
+    Construct a professional 3-paragraph cover letter from extracted data.
+    Used when the generative model is unavailable or returns low-quality output.
+    """
+    top_skills = skills[:5] if skills else ["problem-solving", "communication", "teamwork"]
+    if len(top_skills) > 1:
+        skills_str = ", ".join(top_skills[:-1]) + " and " + top_skills[-1]
+    else:
+        skills_str = top_skills[0]
+
+    strength_str = strengths[0] if strengths else "delivering high-quality results"
+    jd_preview = jd_snippet.strip()[:90].rstrip(".,;")
+
+    return (
+        f"Dear Hiring Manager,\n\n"
+        f"I am writing to express my strong interest in the {role} position. "
+        f"With a solid background in {skills_str}, I am confident my experience aligns "
+        f"closely with the requirements outlined in your job posting.\n\n"
+        f"Throughout my career I have demonstrated {strength_str.lower()}. "
+        f"My hands-on work with {', '.join(top_skills[:3])} has prepared me to "
+        f"contribute meaningfully from day one. I am particularly excited by the "
+        f"opportunity to work on {jd_preview}, and I believe my skill set makes me "
+        f"a strong match for what your team is looking for.\n\n"
+        f"I would welcome the chance to discuss how my background and enthusiasm can "
+        f"support your organisation's goals. Thank you for your time and consideration — "
+        f"I look forward to speaking with you.\n\nSincerely,\n{name}"
+    )
+
+
+def _generate_with_flan(name: str, role: str, jd: str, skills: list[str]) -> str | None:
+    """
+    Ask google/flan-t5-large to draft a cover letter.
+    Returns None on any failure so the caller can fall back to the template.
+    """
+    skills_str = ", ".join(skills[:8]) if skills else "various professional skills"
+    prompt = (
+        f"Write a professional 3-paragraph cover letter for {name} applying "
+        f"for the {role} position.\n"
+        f"Applicant skills: {skills_str}.\n"
+        f"Job description summary: {jd[:280].strip()}\n"
+        f"Cover letter:"
+    )
+    try:
+        result = _call_hf(
+            FLAN_T5_URL,
+            {"inputs": prompt, "parameters": {"max_new_tokens": 380}},
+        )
+        if isinstance(result, list) and result:
+            text = result[0].get("generated_text", "").strip()
+            # Accept only if the model produced a substantive response
+            if len(text) > 120:
+                return text
+    except Exception:
+        pass
+    return None
+
+
+# ── /cover-letter route ────────────────────────────────────────────────────────
+
+@app.post("/cover-letter", tags=["cover-letter"])
+async def generate_cover_letter(
+    resume: UploadFile = File(
+        ..., description="Candidate's resume — PDF format only."
+    ),
+    job_description: str = Form(
+        ..., description="Job description to tailor the letter toward."
+    ),
+    applicant_name: str = Form(
+        default="Applicant",
+        description="Full name that will appear in the letter signature.",
+    ),
+    target_role: str = Form(
+        default="this position",
+        description="Job title the applicant is applying for.",
+    ),
+):
+    """
+    Generate a tailored cover letter from a PDF resume + job description.
+
+    Strategy:
+      1. Extract text from the uploaded PDF.
+      2. Extract skills (NER + regex) and strengths (zero-shot) from the resume.
+      3. Try google/flan-t5-large to produce a custom draft.
+      4. Fall back to a structured template if the model is unavailable.
+    """
+    filename = (resume.filename or "").lower()
+    if not filename.endswith(".pdf"):
+        raise HTTPException(
+            status_code=400,
+            detail="Only PDF resumes are supported. Please upload a .pdf file.",
+        )
+
+    file_bytes = await resume.read()
+    resume_text = extract_pdf_text(file_bytes)
+
+    if len(resume_text.split()) < 20:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "Extracted text is too short — the PDF may be image-based. "
+                "Please use a text-selectable PDF."
+            ),
+        )
+
+    skills = extract_skills(resume_text)
+    strengths = identify_strengths(resume_text)
+
+    # Try the generative model; fall back to a high-quality template
+    letter = _generate_with_flan(applicant_name, target_role, job_description, skills)
+    if not letter:
+        letter = _build_cover_letter_template(
+            applicant_name, target_role, skills, strengths, job_description
+        )
+
+    return {"cover_letter": letter, "skills_used": skills[:8]}

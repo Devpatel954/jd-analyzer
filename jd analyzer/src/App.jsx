@@ -6,6 +6,7 @@ import {
   TrendingUp, ChevronRight, WifiOff,
   Users, Award, Clock, BarChart2, ChevronDown,
   Shield, Lock, Target, Briefcase,
+  Edit3, Copy, ClipboardCheck, User, Sparkles,
 } from 'lucide-react'
 import './App.css'
 
@@ -415,6 +416,236 @@ function HowItWorks() {
   )
 }
 
+// ─── Cover Letter Section ───────────────────────────────────────────────────────────
+function CoverLetterSection({ file, jobDescription }) {
+  const [clName, setClName]       = useState('')
+  const [clRole, setClRole]       = useState('')
+  const [clJd,   setClJd]         = useState(jobDescription || '')
+  const [generating, setGenerating] = useState(false)
+  const [coverLetter, setCoverLetter] = useState('')
+  const [error, setError]         = useState(null)
+  const [copied, setCopied]       = useState(false)
+
+  // Keep local JD in sync when parent state changes (until user edits it)
+  const [jdTouched, setJdTouched] = useState(false)
+  if (!jdTouched && jobDescription && clJd !== jobDescription) {
+    setClJd(jobDescription)
+  }
+
+  const canGenerate = file !== null && clJd.trim().length >= 30
+
+  const handleGenerate = async () => {
+    if (!canGenerate || generating) return
+    setGenerating(true)
+    setCoverLetter('')
+    setError(null)
+
+    try {
+      const form = new FormData()
+      form.append('resume', file)
+      form.append('job_description', clJd)
+      form.append('applicant_name', clName.trim() || 'Applicant')
+      form.append('target_role', clRole.trim() || 'this position')
+
+      const res = await fetch(`${API_BASE}/cover-letter`, { method: 'POST', body: form })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.detail || `Server error ${res.status}`)
+      }
+      const data = await res.json()
+      setCoverLetter(data.cover_letter || '')
+    } catch (err) {
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        setError('Cannot reach the backend. Make sure FastAPI is running on http://localhost:8000.')
+      } else {
+        setError(err.message)
+      }
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(coverLetter).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    })
+  }
+
+  return (
+    <section id="cover-letter" className="py-16 px-4 sm:px-6 bg-white">
+      <div className="max-w-4xl mx-auto">
+        {/* Heading */}
+        <div className="text-center mb-10">
+          <span className="inline-flex items-center gap-1.5 bg-violet-50 text-violet-700 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-violet-100 mb-4">
+            <Edit3 size={12} /> AI Cover Letter
+          </span>
+          <h2 className="text-2xl font-bold text-slate-800">Generate a Tailored Cover Letter</h2>
+          <p className="text-slate-500 text-sm mt-2 max-w-lg mx-auto">
+            Powered by the same AI models. Uses your uploaded resume's skills to write a
+            personalised, job-specific cover letter in seconds.
+          </p>
+        </div>
+
+        {/* No-file notice */}
+        {!file && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-3 p-5 rounded-2xl border border-amber-200 bg-amber-50 text-sm text-amber-800 mb-6"
+          >
+            <AlertCircle size={18} className="flex-shrink-0 text-amber-500" />
+            <span>Upload your resume in the <strong>Analyze Your Resume</strong> section above first, then come back here to generate your cover letter.</span>
+          </motion.div>
+        )}
+
+        {/* Form */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-5">
+          {/* Name + Role row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <span className="flex items-center gap-2">
+                  <User size={14} className="text-violet-500" /> Your Name
+                </span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Jane Doe"
+                value={clName}
+                onChange={e => setClName(e.target.value)}
+                className="w-full px-3.5 py-2.5 text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-300 focus:border-violet-400 transition-all placeholder-slate-400"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <span className="flex items-center gap-2">
+                  <Briefcase size={14} className="text-violet-500" /> Target Role
+                </span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Senior Software Engineer"
+                value={clRole}
+                onChange={e => setClRole(e.target.value)}
+                className="w-full px-3.5 py-2.5 text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-300 focus:border-violet-400 transition-all placeholder-slate-400"
+              />
+            </div>
+          </div>
+
+          {/* JD textarea */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <span className="flex items-center gap-2">
+                <FileText size={14} className="text-violet-500" /> Job Description
+              </span>
+            </label>
+            <textarea
+              rows={5}
+              placeholder="Paste the job description here (auto-filled if you already entered it above)…"
+              value={clJd}
+              onChange={e => { setClJd(e.target.value); setJdTouched(true) }}
+              className="w-full p-3.5 text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-violet-300 focus:border-violet-400 transition-all placeholder-slate-400 leading-relaxed"
+            />
+          </div>
+
+          {/* Error */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="flex items-start gap-3 p-4 rounded-xl border border-rose-200 bg-rose-50 text-sm text-rose-700"
+                role="alert"
+              >
+                <WifiOff size={16} className="flex-shrink-0 mt-0.5 text-rose-500" />
+                <p className="flex-1">{error}</p>
+                <button onClick={() => setError(null)} className="text-rose-400 hover:text-rose-700 p-1" aria-label="Dismiss">
+                  <X size={14} />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Generate button */}
+          <motion.button
+            onClick={handleGenerate}
+            disabled={!canGenerate || generating}
+            whileHover={{ scale: canGenerate && !generating ? 1.02 : 1 }}
+            whileTap={{ scale: canGenerate && !generating ? 0.98 : 1 }}
+            className={`w-full inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm transition-all shadow-md select-none ${
+              canGenerate && !generating
+                ? 'bg-violet-600 hover:bg-violet-700 text-white shadow-violet-200 cursor-pointer'
+                : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+            }`}
+          >
+            {generating ? (
+              <><Loader2 size={18} className="animate-spin" /> AI is writing your letter — this may take ~30 s…</>
+            ) : (
+              <><Edit3 size={18} /> Generate Cover Letter</>
+            )}
+          </motion.button>
+        </div>
+
+        {/* Result */}
+        <AnimatePresence>
+          {coverLetter && (
+            <motion.div
+              key="cover-letter-result"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.45 }}
+              className="mt-6 bg-white rounded-2xl border border-violet-200 shadow-sm overflow-hidden"
+            >
+              {/* Card header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-violet-100 bg-violet-50">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
+                    <Edit3 size={14} className="text-violet-600" />
+                  </div>
+                  <span className="font-semibold text-slate-800 text-sm">Your Cover Letter</span>
+                  <span className="inline-flex items-center gap-1 bg-violet-100 text-violet-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-violet-200 ml-1">
+                    AI Generated
+                  </span>
+                </div>
+                <motion.button
+                  onClick={handleCopy}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+                    copied
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300 hover:text-violet-700'
+                  }`}
+                  aria-label="Copy cover letter"
+                >
+                  {copied
+                    ? <><ClipboardCheck size={13} /> Copied!</>
+                    : <><Copy size={13} /> Copy</>}
+                </motion.button>
+              </div>
+              {/* Letter body */}
+              <div className="px-6 py-5">
+                <pre className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap font-sans">
+                  {coverLetter}
+                </pre>
+              </div>
+              <div className="px-6 pb-5">
+                <p className="text-xs text-slate-400 flex items-center gap-1.5">
+                  <AlertCircle size={11} />
+                  Review and personalise before sending — AI output may need minor editing.
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </section>
+  )
+}
+
 // ─── Stats Section ─────────────────────────────────────────────────────────────
 const STATS = [
   { icon: <Users size={22} />, value: '50K+', label: 'Resumes Analyzed', color: 'indigo' },
@@ -780,7 +1011,7 @@ function CTABanner() {
 // ─── Footer ────────────────────────────────────────────────────────────────────
 function Footer() {
   return (
-    <footer className="bg-slate-900 text-slate-400 py-10 mt-20">
+    <footer className="bg-slate-900 text-slate-400 py-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
           <div className="flex items-center gap-2">
@@ -1019,6 +1250,8 @@ export default function App() {
           </AnimatePresence>
         </div>
       </section>
+
+      <CoverLetterSection file={file} jobDescription={jobDescription} />
 
       <TestimonialsSection />
 
