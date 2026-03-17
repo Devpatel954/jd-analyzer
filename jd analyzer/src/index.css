@@ -1,0 +1,9 @@
+﻿@import "tailwindcss";
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

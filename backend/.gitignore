@@ -1,0 +1,9 @@
+# .gitignore for the backend
+.env
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+dist/
+*.egg-info/

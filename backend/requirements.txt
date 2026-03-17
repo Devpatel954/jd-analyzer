@@ -1,0 +1,15 @@
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+
+# PDF text extraction
+PyPDF2==3.0.1
+
+# HTTP client for HuggingFace Inference API
+requests==2.32.3
+
+# Environment variable management
+python-dotenv==1.0.1
+
+# ASGI form/file handling (included with FastAPI but pinned for clarity)
+python-multipart==0.0.20

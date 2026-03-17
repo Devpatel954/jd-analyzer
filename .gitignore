@@ -1,0 +1,24 @@
+# Python
+backend/venv/
+backend/.venv/
+backend/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/*.egg-info/
+
+# Secrets — NEVER commit the token
+backend/.env
+
+# Node / Frontend
+jd analyzer/node_modules/
+jd analyzer/dist/
+jd analyzer/.vite/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.suo
+*.user
