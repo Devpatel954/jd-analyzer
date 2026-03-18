@@ -10,8 +10,8 @@ import {
 } from 'lucide-react'
 import './App.css'
 
-// Base URL for the FastAPI backend — change port if you run uvicorn elsewhere
-const API_BASE = 'http://localhost:8000'
+// Base URL for the FastAPI backend — set VITE_API_URL env var in production
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 // ─── Circular Progress Bar ─────────────────────────────────────────────────────
 function CircularProgress({ value }) {

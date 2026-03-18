@@ -125,6 +125,7 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:5173",
         "http://localhost:5174",
+        "https://jd-analyzer-psi.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
