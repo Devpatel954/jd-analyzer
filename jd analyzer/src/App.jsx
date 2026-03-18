@@ -11,7 +11,7 @@ import {
 import './App.css'
 
 // Base URL for the FastAPI backend — set VITE_API_URL env var in production
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
 
 // ─── Circular Progress Bar ─────────────────────────────────────────────────────
 function CircularProgress({ value }) {
