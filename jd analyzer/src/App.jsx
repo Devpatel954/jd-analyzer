@@ -353,7 +353,7 @@ function Header() {
             <ChevronRight size={14} />
           </a>
           <a
-            href="https://github.com"
+            href="https://github.com/Devpatel954"
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all"
