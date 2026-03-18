@@ -783,10 +783,10 @@ function ScoreBreakdownSection() {
 // ─── Testimonials Section ──────────────────────────────────────────────────────
 const TESTIMONIALS = [
   {
-    name: 'Priya Sharma',
+    name: 'Riya Mehta',
     role: 'Software Engineer',
     company: 'Google',
-    initials: 'PS',
+    initials: 'RM',
     color: 'bg-indigo-500',
     quote:
       'ResumeMatch flagged 8 missing keywords I never would have noticed. I updated my resume that night and got a callback within 3 days. Honestly, this tool changed my job search.',
